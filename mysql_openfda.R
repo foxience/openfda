@@ -15,7 +15,10 @@ con <- dbConnect(RMySQL::MySQL(),
 dbGetQuery(con, 'SET NAMES utf8')
 
 # Create the data frame properties
-properties <- dbGetQuery(con, "SELECT * FROM `report` limit 10")
+reports <- dbGetQuery(con, "SELECT * FROM `report` limit 10")
 
-print(properties)
-View(properties)
+print(reports)
+View(reports)
+
+report <- dbGetQuery(con, "SELECT * FROM `report` WHERE id='00000010-ec8e-11e6-aaaa-70b2e7692ca3'")
+View(report)
