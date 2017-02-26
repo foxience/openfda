@@ -17,13 +17,15 @@ summary(prostate.test)
 
 y <- "diagnosis"
 x <- setdiff(names(prostate.train), c("diagnosis", "id"))
-dl <- h2o.deeplearning(x=x, y=y,
+dl <- h2o.deeplearning(x = x, y = y,
                       training_frame=prostate.train,
                       validation_frame=prostate.validate,
                       distribution="bernoulli",
                       activation="Tanh",
                       loss="CrossEntropy",
                       hidden=c(10,10,10),
+                      l1=1e-3,
+                      l2=1e-2,
                       sparse=TRUE,
                       epochs=10000,
                       stopping_rounds = 3,
