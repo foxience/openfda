@@ -14,22 +14,53 @@ con <- dbConnect(RMySQL::MySQL(),
 # set encoding for connection
 dbGetQuery(con, 'SET NAMES utf8')
 
-# Create the data frame properties
+# Query all reports from database
 reports <- dbGetQuery(con, "SELECT * FROM `report` limit 10")
+# View(reports)
 
-print(reports)
-View(reports)
+getReport <- function (connection, reportId) {
+  # Query a specific report based on report id
+  report <- dbGetQuery(connection, paste0("SELECT * FROM `patient`
+                       WHERE reportId = '", as.character(reportId),  "'"))
+  # View(report)
+  
+  # Query patient info belong to a specific report
+  patient <- dbGetQuery(connection, paste0("SELECT * FROM `patient`
+                        WHERE reportId = '", report$id,  "'"))
+  # View(patient)
+  
+  # Query all reactions belong to a report
+  reactions <- dbGetQuery(connection, paste0("SELECT * FROM `reaction`
+                          WHERE reportId = '", report$id,  "'"))
+  # View(reactions)
+  
+  # Query all drugs belong to a report
+  drugs <- dbGetQuery(connection, paste0("SELECT * FROM `drug`
+                      WHERE reportId = '", report$id,  "'"))
+  # View(drugs)
+  
+  # Query all drug substances
+  substanceQuery <- paste0("SELECT * FROM `substance` WHERE drugId IN ('",
+                           trimws(paste(drugs$id, sep = "','")),
+                           "')")
+  substances <- dbGetQuery(connection, substanceQuery)
+  # View(substances)
+  
+  return(list(report = report,
+              patient = patient,
+              drugs = drugs,
+              substances = substances,
+              reactions = reactions))
+}
 
-report <- dbGetQuery(con, "SELECT * FROM `report` WHERE id = '00000010-ec8e-11e6-aaaa-70b2e7692ca3'")
-View(report)
-patient <- dbGetQuery(con, "SELECT * FROM `patient` WHERE reportId = '00000010-ec8e-11e6-aaaa-70b2e7692ca3'")
-View(patient)
-reaction <- dbGetQuery(con, "SELECT * FROM `reaction` WHERE reportId = '00000010-ec8e-11e6-aaaa-70b2e7692ca3'")
-View(reaction)
-drug <- dbGetQuery(con, "SELECT * FROM `drug` WHERE reportId = '00000010-ec8e-11e6-aaaa-70b2e7692ca3'")
-View(drug)
+#substanceIndex <- dbGetQuery(con, "SELECT substance, COUNT(substance) AS freq
+#                            FROM substance
+#                            GROUP BY substance
+#                            HAVING freq >= 100
+#                            ORDER BY freq DESC")
 
-substanceQuery <- paste("SELECT * FROM `substance` WHERE drugId IN ('",
-                        trimws(paste(drug$id, sep = "','")),
-                        "')", sep = '')
-substance <- dbGetQuery(con, substanceQuery)
+#reactionIndex <- dbGetQuery(con, "SELECT reactionName, COUNT(reactionName) AS freq
+#                            FROM reaction
+#                            GROUP BY reactionName
+#                            HAVING freq >= 1000
+#                            ORDER BY freq DESC")
